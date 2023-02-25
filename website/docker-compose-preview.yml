@@ -15,16 +15,15 @@ services:
     networks:
       - "traefik-public"
     expose:
-      - 80 
-    volumes: 
-      - /home/reyman/Projets/Guix-ified/workshop/cist-EE/eecist-offline-rpi/website/website/_site:/static
+      - 80
+    volumes:
+      - ./website/_site:/static
     depends_on:
       - eewebsite
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik_public"
-#     - "traefik.http.routers.nextcloud.rule=Host(`website.eecist.lan`)"
-      - "traefik.http.routers.website.rule=Host(`localhost`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`website.eecist.lan`)"
       - "traefik.http.routers.website.entrypoints=http"
 
 networks:
