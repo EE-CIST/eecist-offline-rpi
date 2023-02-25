@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  redis:
+    image: "redis:alpine"
+    container_name: magrit-redis
+    privileged: true
+    command: sh -c "sysctl vm.overcommit_memory=1 && redis-server /home/redis.conf"
+    restart: unless-stopped
+    volumes:
+      - ./redis/conf:/home
+    networks:
+       - traefik-public
+    sysctls:
+        net.core.somaxconn: 512
+
+  nginx:
+    container_name: magrit-nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    links:
+      - magritapp
+    networks:
+      - traefik-public
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - staticfiles:/var/www/static
+      - ./nginx/conf-http:/etc/nginx/sites-enabled
+    depends_on:
+      - magritapp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.magrit.rule=Host(`magrit.eecist.lan`, `magrit`)"
+      - "traefik.http.services.magrit.loadbalancer.server.port=80"
+
+
+
+  magritapp:
+    image: magrit/magrit-arm64
+    links:
+      - redis
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    volumes:
+      - staticfiles:/home/app/magrit/magrit_app/static
+    depends_on:
+      - redis
+
+networks:
+  traefik-public:
+    external: true
+
+volumes:
+  staticfiles:
+

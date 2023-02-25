@@ -1,0 +1,24 @@
+
+entryPoints:
+  http:
+    address: ":80"
+
+  traefik:
+    address: ":8080"
+
+api:
+  insecure: true
+  dashboard: true
+
+log:
+  level: "DEBUG"
+
+providers:
+  docker:
+    watch: true
+    exposedByDefault: true
+
+#  file:
+#    directory: "/etc/traefik/dynamic-conf/"
+#    watch: true
+

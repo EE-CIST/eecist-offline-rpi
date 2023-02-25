@@ -1,0 +1,38 @@
+services:
+  pihole:
+    image: pihole/pihole:latest
+    ports:
+      # port 80 will go through Traefik
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80/tcp"
+    networks:
+      - traefik-public
+    environment:
+      - "TZ=Europe/Paris"
+      - "WEBPASSWORD=lejaguardebamako"
+      - "VIRTUAL_HOST=pihole.eecist.lan"
+      - "ServerIP: 192.168.1.42"
+      - "DNSMASQ_LISTENING=all"
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.eecist.lan`, `pihole`)"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+    volumes:
+      - pihole_etc:/etc/pihole
+      - pihole_dnsmasq:/etc/dnsmasq.d/
+    restart: unless-stopped
+
+networks:
+  traefik-public:
+    external: true
+
+volumes:
+  pihole_etc:
+    name: pihole_etc
+  pihole_dnsmasq:
+    name: pihole_dnsmasq
